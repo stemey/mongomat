@@ -1,9 +1,10 @@
 var app = require('./app').app,
 	db = require('./app').db,
-	QueryParser = require('./QueryParser')
+	QueryParser = require('./QueryParser'),
+	GenericCrud = require('./GenericCrud')
 
 
-var queryParser = new QueryParser();
+var crud = new GenericCrud({queryParser: new QueryParser()});
 
 app.param('collectionName', function (req, res, next, collectionName) {
 	req.collection = db.collection(collectionName)
@@ -11,41 +12,23 @@ app.param('collectionName', function (req, res, next, collectionName) {
 })
 
 app.get('/collections/:collectionName', function (req, res, next) {
-	var query = queryParser.parseQuery(req);
-	var options = queryParser.parseOptions(req);
-	req.collection.find(query, options).toArray(function (e, results) {
-		if (e) return next(e)
-		res.send(results)
-	})
+	crud.find(req.collection, req, res, next);
 })
 
 app.post('/collections/:collectionName', function (req, res, next) {
-	req.collection.insert(req.body, {}, function (e, results) {
-		if (e) return next(e)
-		res.send(results)
-	})
+	crud.insert(req.collection, req.body, res, next);
 })
 
 app.get('/collections/:collectionName/:id', function (req, res, next) {
-	req.collection.findById(req.params.id, function (e, result) {
-		if (e) return next(e)
-		res.send(result)
-	})
+	crud.get(req.collection, req.params.id, res, next);
 })
 
 app.put('/collections/:collectionName/:id', function (req, res, next) {
-	delete req.body._id;
-	req.collection.updateById(req.params.id, {$set: req.body}, {safe: true, multi: false}, function (e, result) {
-		if (e) return next(e)
-		res.send((result === 1) ? {msg: 'success'} : {msg: 'error'})
-	})
+	crud.update(req.collection, req.params.id, req.body, res, next);
 })
 
 app.delete('/collections/:collectionName/:id', function (req, res, next) {
-	req.collection.removeById(req.params.id, function (e, result) {
-		if (e) return next(e)
-		res.send((result === 1) ? {msg: 'success'} : {msg: 'error'})
-	})
+	crud.delete(req.collection, req.params.id, res, next);
 })
 
 

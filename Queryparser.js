@@ -1,3 +1,5 @@
+var EJSON = require('mongodb-extended-json');
+
 var QueryParser = function () {
 
 }
@@ -7,7 +9,7 @@ QueryParser.prototype.readJsonParam = function (req, key, defaultValue) {
 	var value;
 	var param = req.param(key);
 	if (param) {
-		value = JSON.parse(param);
+		value = EJSON.parse(param);
 	} else {
 		value = defaultValue || {};
 	}
