@@ -1,41 +1,62 @@
 var express = require('express'),
-    db = require('./app').db;
+	db = require('./app').db,
+	adminDb = require('./app').admin,
+	config = require('./app').config,
+	metaCollection = require('./app').metaCollection,
+    mongoskin = require('mongoskin');
 
-var adminDb = db.admin();
 
+
+var getDatabases = function (cb) {
+	adminDb.listDatabases(function (err, dbs) {
+		if (err) {
+			cb(err);
+		} else {
+			var mdbs = dbs.databases.map(function (mdb) {
+				mdb.host = config.host;
+				return mdb;
+			});
+			cb(null, mdbs);
+		}
+	});
+}
 
 app.get('/db', function (req, res, next) {
-	adminDb.listDatabases(function (err, dbs) {
+	getDatabases(function (err, dbs) {
 		if (err) return next(err)
-		res.send(dbs);
+		res.send({data: dbs, total: dbs.length});
 	});
 })
 
 app.get('/db/:id', function (req, res, next) {
-	adminDb.listDatabases(function (err, dbs) {
+	getDatabases(function (err, dbs) {
 		if (err) return next(err)
-		var candidates = dbs.databases.filter(function(db) {
-			return db.name===req.params.id;
+		var candidates = dbs.filter(function (db) {
+			return db.name === req.params.id;
 		})
-		if (candidates.length===1) {
+		if (candidates.length === 1) {
 			res.send(candidates[0]);
 		} else {
-			res.setatus(404);
+			res.status(404);
 		}
 	});
 })
 
-app.put('/db/synchronize', function (req, res, next) {
-	db.collectionNames(null, {namesOnly: true}, function (e, collectionNames) {
+app.put('/db/synchronize/:id', function (req, res, next) {
+	var dbName = req.param("id");
+	var adb = db(dbName);
+	adb.collectionNames(null, {namesOnly: true}, function (e, collectionNames) {
 		if (e) {
 			return next(e);
 		}
 		var collection = {};
 		collectionNames.forEach(function (name) {
-			var shortName = name.substring("testaccount".length + 1);
-			collection[shortName] = false;
+			var shortName = name.substring(dbName.length + 1);
+			if (!shortName.match(/^system/)) {
+				collection[shortName] = false;
+			}
 		})
-		meta.find({}, function (e, results) {
+		metaCollection.find({}, function (e, results) {
 			results.toArray(function (e, metaNames) {
 				if (e) {
 					return next(e);
@@ -47,6 +68,7 @@ app.put('/db/synchronize', function (req, res, next) {
 					return {
 						collection: collectionName,
 						name: collectionName,
+						db: dbName,
 						description: "generated on " + new Date() + "."
 					};
 				});
@@ -58,6 +80,6 @@ app.put('/db/synchronize', function (req, res, next) {
 					}
 				});
 			});
-		})
+		});
 	});
 })

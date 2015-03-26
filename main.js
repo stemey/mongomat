@@ -18,6 +18,7 @@ app.use(allowCrossDomain);
 require('./mongorest');
 require('./metarest');
 require('./dbrest');
+require('./schemarest');
 
 
 app.listen(3001);

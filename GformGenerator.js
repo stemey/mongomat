@@ -36,7 +36,7 @@ GformGenerator.prototype.group = function (schema) {
 	return groups;
 }
 GformGenerator.prototype.generate = function (schema) {
-	var gschema = {attributes: []};
+	var gschema = {editor: "listpane", attributes: []};
 	Object.keys(schema).forEach(function (prop) {
 		var path = prop.split(".");
 		if (path.length == 1) {
@@ -52,16 +52,20 @@ GformGenerator.prototype.getLeaf = function (path) {
 GformGenerator.prototype.generateAttribute = function (prop, schema) {
 	var propSchema = schema[prop];
 	var method = "generate_" + propSchema.type;
+	var attribute;
 	if (this[method]) {
-		return this[method](prop, schema);
+		attribute = this[method](prop, schema);
 	} else {
 		var attribute = {code: prop, type: propSchema.type};
 		if (propSchema.required) {
 			attribute.required = propSchema.required;
 		}
 		attribute.editor = this.getEditor(attribute);
-		return attribute;
 	}
+	if (attribute.code === this.config.typeProperty) {
+		attribute.visible = false;
+	}
+	return attribute;
 }
 GformGenerator.prototype.getEditor = function (attribute) {
 	var editor = this.editorMapping[attribute.type];
@@ -119,7 +123,7 @@ GformGenerator.prototype.generate_object = function (prop, mainSchema) {
 		attribute.groups = keys.map(function (discriminator) {
 			var group = groups[discriminator];
 			group.code = discriminator;
-			group.editor="listpane";
+			group.editor = "listpane";
 			return group;
 		})
 		attribute.typeProperty = this.config.typeProperty;

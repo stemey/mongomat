@@ -63,15 +63,15 @@ MetaCrud.prototype.update = function (collection, doc, id, res, next) {
 };
 
 MetaCrud.prototype.generate = function (collection, params, id, res, next) {
-	collection.findById(id,function(e,meta) {
+	collection.findById(id, function (e, meta) {
 		if (e) {
 			return next(e);
-		}else{
-			var dataCollection=db.collection(meta.collection);
-			dataCollection.find({},{limit:100}, function(e,results) {
+		} else {
+			var dataCollection = db.collection(meta.collection);
+			dataCollection.find({}, {limit: 100}, function (e, results) {
 				if (e) {
 					return next(e);
-				} else{
+				} else {
 
 				}
 			})

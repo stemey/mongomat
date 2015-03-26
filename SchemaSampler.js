@@ -9,11 +9,11 @@ var SchemaSampler = function (config) {
 	}
 }
 
-SchemaSampler.prototype.generate=function(params,results) {
-			var schemaGenerator = new SchemaGenerator({typeProperty: params.typeProperty});
-			var gformGenerator = new GformGenerator({typeProperty: params.typeProperty});
-			var schemaInfo = schemaGenerator.generate(results);
-			return gformGenerator.generateMulti(schemaInfo);
+SchemaSampler.prototype.generate = function (params, results) {
+	var schemaGenerator = new SchemaGenerator({typeProperty: params.typeProperty});
+	var gformGenerator = new GformGenerator({typeProperty: params.typeProperty});
+	var schemaInfo = schemaGenerator.generate(results);
+	return gformGenerator.generateMulti(schemaInfo);
 }
 SchemaSampler.prototype.sample = function (metaId, params, callback, errCallback) {
 
@@ -22,7 +22,7 @@ SchemaSampler.prototype.sample = function (metaId, params, callback, errCallback
 		if (e) {
 			errCallback(e);
 		} else {
-			this.db.collection(meta.collection).find({}, {limit: params.sampleCount}, function (e, cursor) {
+			this.db(meta.db).collection(meta.collection).find({}, {limit: params.sampleCount}, function (e, cursor) {
 				if (e) {
 					errCallback(e);
 				} else {
@@ -31,9 +31,9 @@ SchemaSampler.prototype.sample = function (metaId, params, callback, errCallback
 						var discriminators = Object.keys(schema);
 						if (discriminators.length == 1 && discriminators[0] == "default") {
 							var name = discriminators[0];
-							this.sampleSingleSchema(meta, name, schema[name], callback, errCallback);
+							this.sampleSingleSchema(meta, meta.collection, schema[name], params, callback, errCallback);
 						} else {
-							this.sampleMultiSchema(meta, discriminators, schema, callback, errCallback);
+							this.sampleMultiSchema(meta, discriminators, schema, params, callback, errCallback);
 						}
 					}.bind(this));
 				}
@@ -43,7 +43,9 @@ SchemaSampler.prototype.sample = function (metaId, params, callback, errCallback
 	}.bind(this));
 }
 SchemaSampler.prototype.updateMeta = function (meta, callback, errCallback) {
-	this.metaCollection.updateById(meta._id, {$set: meta}, {
+	var id = meta._id;//.toHexString();
+	delete meta._id;
+	this.metaCollection.updateById(id, {$set: meta}, {
 		safe: true,
 		multi: false
 	}, function (e, result) {
@@ -54,38 +56,58 @@ SchemaSampler.prototype.updateMeta = function (meta, callback, errCallback) {
 		}
 	});
 }
-SchemaSampler.prototype.sampleSingleSchema = function (meta, name, schema, callback, errCallback) {
-	var schemaEntity = this.createSchemaEntity(meta,name,schema);
+SchemaSampler.prototype.sampleSingleSchema = function (meta, name, schema, options, callback, errCallback) {
+	var schemaEntity = this.createSchemaEntity(meta, name, schema);
+	this.schemaCollection.findById(name, function (e, result) {
+		if (result == null || !options.overwrite) {
+			if (result == null) {
+				schemaEntity._id = name;
+			}
 
-	this.schemaCollection.insert(schemaEntity, function (e, result) {
-		if (e) {
-			errCallback(e);
+			this.schemaCollection.insert(schemaEntity, function (e, result) {
+				if (e) {
+					errCallback(e);
+				} else {
+					var id = result[0]._id.toHexString();
+					meta.schema = {schemaType: "single-schema", schema: id};
+					this.updateMeta(meta, callback, errCallback);
+				}
+			}.bind(this));
 		} else {
-			meta.schema = {type: "single-schema", schema: result};
-			this.updateMeta(meta, callback, errCallback);
+			this.schemaCollection.updateById(name, schemaEntity, function (e, result) {
+				if (e) {
+					errCallback(e);
+				} else {
+					meta.schema = {schemaType: "single-schema", schema: result};
+					this.updateMeta(meta, callback, errCallback);
+				}
+			}.bind(this));
 		}
+
 	}.bind(this));
 }
-SchemaSampler.prototype.createSchemaEntity=function(meta,name,schema) {
+SchemaSampler.prototype.createSchemaEntity = function (meta, name, schema) {
 	return {
-		_id:name,
 		group: schema,
 		description: "generated on " + new Date() + " for collection " + meta.collection,
 		name: name
 	}
 }
-SchemaSampler.prototype.sampleMultiSchema = function (meta, discriminators, schemaMap, callback, errCallback) {
+
+SchemaSampler.prototype.sampleMultiSchema = function (meta, discriminators, schemaMap, options, callback, errCallback) {
 	var schemas = [];
 	discriminators.forEach(function (discriminator) {
-		var schema = this.createSchemaEntity(meta,discriminator,schemaMap[discriminator]);
+		var schema = this.createSchemaEntity(meta, discriminator, schemaMap[discriminator]);
 		schemas.push(schema);
-	},this);
-	this.schemaCollection.insert(schemas, function (e, ids) {
+	}, this);
+	this.schemaCollection.insert(schemas, function (e, results) {
 		if (e) {
 			errCallback(e);
 		} else {
-			meta.schema = {schemaType: "multi-schema", schemas: ids};
-			meta.typeProperty="className";
+			meta.schema = {schemaType: "multi-schema", schemas: results.map(function(schema) {
+				return schema._id.toHexString();
+			})};
+			meta.schema.typeProperty = options.typeProperty;
 			this.updateMeta(meta, callback, errCallback);
 		}
 	}.bind(this));

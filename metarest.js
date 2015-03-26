@@ -46,7 +46,11 @@ app.delete('/meta/:id', function (req, res, next) {
 })
 
 app.put('/task/generate/:id', function (req, res, next) {
-	schemaSampler.sample(req.params.id, {sampleCount: 100, typeProperty: "className"}, function (msg) {
+	var options = req.body;
+	if (!options.sampleCount) {
+		options.sampleCount=100;
+	}
+	schemaSampler.sample(req.params.id, options, function (msg) {
 		res.send(msg);
 	}, function (e) {
 		next(e);
@@ -54,41 +58,4 @@ app.put('/task/generate/:id', function (req, res, next) {
 
 })
 
-app.put('/task/synchronize', function (req, res, next) {
 
-	db.collectionNames(null, {namesOnly: true}, function (e, collectionNames) {
-		if (e) {
-			return next(e);
-		}
-		var collection = {};
-		collectionNames.forEach(function (name) {
-			var shortName = name.substring("testaccount".length + 1);
-			collection[shortName] = false;
-		})
-		meta.find({}, function (e, results) {
-			results.toArray(function (e, metaNames) {
-				if (e) {
-					return next(e);
-				}
-				metaNames.forEach(function (meta) {
-					delete collection[meta.collection];
-				})
-				var metas = Object.keys(collection).map(function (collectionName) {
-					return {
-						collection: collectionName,
-						name: collectionName,
-						description: "generated on " + new Date() + "."
-					};
-				});
-				metaCollection.insert(metas, function (e, results) {
-					if (e) {
-						next(e);
-					} else {
-						res.send({msg: "success"});
-					}
-				});
-			});
-		})
-	});
-
-})
