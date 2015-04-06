@@ -3,6 +3,7 @@ var express = require('express'),
 	dbHelper = require('mongoskin/lib/helper'),
 	QueryParser = require('./QueryParser')
 MetaCrud = require('./MetaCrud'),
+	ejsonHelper = require('./ejsonHelper'),
 	SchemaSampler = require('./SchemaSampler'),
 	// TODO use the special meta db
 	db = require('./app').db,
@@ -50,7 +51,7 @@ app.put('/task/generate/:id', function (req, res, next) {
 	if (!options.sampleCount) {
 		options.sampleCount=100;
 	}
-	schemaSampler.sample(req.params.id, options, function (msg) {
+	schemaSampler.sample(ejsonHelper.deflateId(req.params.id), options, function (msg) {
 		res.send(msg);
 	}, function (e) {
 		next(e);

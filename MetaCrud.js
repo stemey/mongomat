@@ -1,5 +1,6 @@
 var GenericCrud = require('./GenericCrud');
 var dbHelper = require('mongoskin/lib/helper');
+var ejsonHelper = require('./ejsonHelper');
 var util = require('util');
 var ObjectID = require('bson').ObjectID
 
@@ -18,7 +19,7 @@ MetaCrud.prototype.insert = function (collection, doc, res, next) {
 		if (result > 0) {
 			res.status(512).send({status: 512, message: "the collection already exists"})
 		} else {
-			var col = me.db.createCollection(doc.collection, function (e, results) {
+			var col = me.db(doc.db).createCollection(doc.collection, function (e, results) {
 				if (e) {
 					next(e);
 				} else {
@@ -32,27 +33,45 @@ MetaCrud.prototype.insert = function (collection, doc, res, next) {
 	})
 }
 
+MetaCrud.prototype.delete = function (collection, id, res, next) {
+	collection.findById(ejsonHelper.deflateId(id), function (e, result) {
+		if (e) return next(e);
+		this.db(result.db).collection(result.collection).drop(function (e, result) {
+			if (e) return next(e);
+			collection.removeById(ejsonHelper.deflateId(id), function (e, result) {
+				if (e) return next(e)
+				res.send((result === 1) ? {msg: 'success'} : {msg: 'error'})
+			}.bind(this))
+		}.bind(this));
+	}.bind(this));
+}
+
 MetaCrud.prototype.update = function (collection, doc, id, res, next) {
-	delete doc._id;
 	var me = this;
-	collection.count({collection: doc.collection, _id: {$ne: ObjectID(id)}}, function (e, result) {
+	collection.count({collection: doc.collection, _id: {$ne: ejsonHelper.deflateId(id)}}, function (e, result) {
 		if (result > 0) {
 			res.status(512).send({status: 512, message: "the collection already exists"})
 		} else {
 			collection.findById(id, function (e, result) {
-				if (result.collection !== doc.collection) {
+				if (result != null && result.collection !== doc.collection) {
 					me.db.collection(result.collection).rename(doc.collection, function (e, result) {
 						if (e) {
 							next(e);
 						} else {
-							collection.updateById(id, {$set: doc}, {safe: true, multi: false}, function (e, result) {
+							collection.updateById(ejsonHelper.deflateId(id), ejsonHelper.deflate(doc), {
+								safe: true,
+								multi: false
+							}, function (e, result) {
 								if (e) return next(e)
 								res.send((result === 1) ? {msg: 'success'} : {msg: 'error'})
 							})
 						}
 					});
 				} else {
-					collection.updateById(id, {$set: doc}, {safe: true, multi: false}, function (e, result) {
+					collection.updateById(ejsonHelper.deflateId(id), ejsonHelper.deflate(doc), {
+						safe: true,
+						multi: false
+					}, function (e, result) {
 						if (e) return next(e)
 						res.send((result === 1) ? {msg: 'success'} : {msg: 'error'})
 					})
@@ -63,7 +82,7 @@ MetaCrud.prototype.update = function (collection, doc, id, res, next) {
 };
 
 MetaCrud.prototype.generate = function (collection, params, id, res, next) {
-	collection.findById(id, function (e, meta) {
+	collection.findById(ejsonHelper.deflateId(id), function (e, meta) {
 		if (e) {
 			return next(e);
 		} else {

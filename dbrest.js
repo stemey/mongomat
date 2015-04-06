@@ -1,10 +1,10 @@
 var express = require('express'),
 	db = require('./app').db,
+	ejsonHelper = require('./ejsonHelper'),
 	adminDb = require('./app').admin,
 	config = require('./app').config,
 	metaCollection = require('./app').metaCollection,
-    mongoskin = require('mongoskin');
-
+	mongoskin = require('mongoskin');
 
 
 var getDatabases = function (cb) {
@@ -35,7 +35,23 @@ app.get('/db/:id', function (req, res, next) {
 			return db.name === req.params.id;
 		})
 		if (candidates.length === 1) {
-			res.send(candidates[0]);
+			var db = candidates[0];
+			metaCollection.find({db: db.name}, function (e, results) {
+				if (e != null) {
+					return next(e);
+				} else {
+					results.toArray(function (e, results) {
+						if (e != null) {
+							return next(e);
+						} else {
+							db.collections = results.map(function (coll) {
+								return ejsonHelper.inflateId(coll._id);
+							})
+							res.send(db);
+						}
+					});
+				}
+			})
 		} else {
 			res.status(404);
 		}
@@ -56,14 +72,25 @@ app.put('/db/synchronize/:id', function (req, res, next) {
 				collection[shortName] = false;
 			}
 		})
-		metaCollection.find({}, function (e, results) {
+		var existing = Object.keys(collection);
+		metaCollection.find({db: dbName}, function (e, results) {
 			results.toArray(function (e, metaNames) {
 				if (e) {
 					return next(e);
 				}
+				var removed = {};
 				metaNames.forEach(function (meta) {
+					removed[meta.collection] = true;
 					delete collection[meta.collection];
 				})
+				existing.forEach(function (name) {
+					delete removed[name];
+				})
+				if (Object.keys(removed).length > 0) {
+					metaCollection.remove({db: dbName, collection: {$in: Object.keys(removed)}}, function (e, result) {
+						console.log("removed " + result + " collections ");
+					});
+				}
 				var metas = Object.keys(collection).map(function (collectionName) {
 					return {
 						collection: collectionName,
@@ -72,13 +99,21 @@ app.put('/db/synchronize/:id', function (req, res, next) {
 						description: "generated on " + new Date() + "."
 					};
 				});
-				metaCollection.insert(metas, function (e, results) {
-					if (e) {
-						next(e);
-					} else {
-						res.send({msg: "success"});
-					}
-				});
+				if (metas.length > 0) {
+					metaCollection.insert(metas, function (e, results) {
+						if (e) {
+							next(e);
+						} else {
+							var newCollections = [];
+							results.forEach(function (collection) {
+								newCollections.push(ejsonHelper.inflate(collection));
+							})
+							res.send({msg: "success", collections: newCollections});
+						}
+					});
+				} else {
+					res.send({msg: "success", collections: []});
+				}
 			});
 		});
 	});

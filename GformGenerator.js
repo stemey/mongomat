@@ -82,7 +82,8 @@ GformGenerator.prototype.generate_string = function (prop, mainSchema) {
 		type: "string",
 		required: propSchema.required
 	}
-	if (propSchema.values) {
+	// make sure we dont have a values array of ObjectIds
+	if (propSchema.values && attribute.code!=="_id") {
 		attribute.values = propSchema.values.map(function (value) {
 			return {value: value, label: value};
 		});
