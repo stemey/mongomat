@@ -48,7 +48,7 @@ MetaCrud.prototype.delete = function (collection, id, res, next) {
 
 MetaCrud.prototype.update = function (collection, doc, id, res, next) {
 	var me = this;
-	collection.count({collection: doc.collection, _id: {$ne: ejsonHelper.deflateId(id)}}, function (e, result) {
+	collection.count({collection: doc.collection, db:doc.db,_id: {$ne: ejsonHelper.deflateId(id)}}, function (e, result) {
 		if (result > 0) {
 			res.status(512).send({status: 512, message: "the collection already exists"})
 		} else {
