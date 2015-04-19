@@ -11,7 +11,7 @@ var SchemaSampler = function (config) {
 
 SchemaSampler.prototype.generate = function (params, results) {
 	var schemaGenerator = new SchemaGenerator({typeProperty: params.typeProperty});
-	var gformGenerator = new GformGenerator({typeProperty: params.typeProperty});
+	var gformGenerator = new GformGenerator({typeProperty: params.typeProperty, editorMapping: {"any": "anyAce"}});
 	var schemaInfo = schemaGenerator.generate(results);
 	return gformGenerator.generateMulti(schemaInfo);
 }

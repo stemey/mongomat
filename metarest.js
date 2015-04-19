@@ -2,7 +2,7 @@ var express = require('express'),
 	mongoskin = require('mongoskin'),
 	dbHelper = require('mongoskin/lib/helper'),
 	QueryParser = require('./QueryParser')
-MetaCrud = require('./MetaCrud'),
+	MetaCrud = require('./MetaCrud'),
 	ejsonHelper = require('./ejsonHelper'),
 	SchemaSampler = require('./SchemaSampler'),
 	// TODO use the special meta db
