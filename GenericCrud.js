@@ -8,7 +8,7 @@ var GenericCrud = function (config) {
 GenericCrud.prototype.insert = function (collection, doc, res, next) {
 	collection.insert(ejsonHelper.deflate(doc), {}, function (e, results) {
 		if (e) return next(e)
-		res.send(results);
+		res.send(ejsonHelper.inflate(results[0]));
 	}.bind(this))
 }
 

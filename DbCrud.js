@@ -59,7 +59,7 @@ DbCrud.prototype.get = function (id, cb) {
 							db.collections = results.map(function (coll) {
 								return ejsonHelper.inflateId(coll._id);
 							})
-							cb(null, dbs);
+							cb(null, db);
 						}
 					});
 				}
