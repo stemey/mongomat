@@ -3,46 +3,44 @@ var express = require('express'),
 	ejsonHelper = require('./ejsonHelper'),
 	adminDb = require('./app').admin,
 	config = require('./app').config,
-	metaCollection = require('./app').metaCollection,
-	mongoskin = require('mongoskin');
+	metaCollection = require('./app').metaCollection
 
 
-var DbCrud = function (config) {
-	this.config = config;
+var DbCrud = function () {
+	if (config.dbNames) {
+		this.dbs = config.dbNames.map(function (name) {
+			return {name: name, _id: name};
+		});
+	}
+
 }
 
 
 DbCrud.prototype._getDatabases = function (cb) {
-	adminDb.listDatabases(function (err, dbs) {
-		if (err) {
-			cb(err);
-		} else {
-			var mdbs = dbs.databases.map(function (mdb) {
-				mdb.host = config.host;
-				return mdb;
-			});
-			cb(null, mdbs);
-		}
-	});
+	if (this.dbs) {
+		cb(null,this.dbs);
+	} else {
+		adminDb.listDatabases(function (err, dbs) {
+			if (err) {
+				cb(err);
+			} else {
+				var mdbs = dbs.databases.map(function (mdb) {
+					mdb.host = config.host;
+					return mdb;
+				});
+				cb(null, mdbs);
+			}
+		});
+	}
 }
 
 DbCrud.prototype.find = function (cb) {
-	adminDb.listDatabases(function (err, dbs) {
-		if (err) {
-			cb(err);
-		} else {
-			var mdbs = dbs.databases.map(function (mdb) {
-				mdb.host = config.host;
-				return mdb;
-			});
-			cb(null, mdbs);
-		}
-	});
+	this._getDatabases(cb);
 };
 
 DbCrud.prototype.get = function (id, cb) {
 	this.find(function (err, dbs) {
-		if (err) return next(err)
+		if (err) return cb(err)
 		var candidates = dbs.filter(function (db) {
 			return db.name === id;
 		})
@@ -65,13 +63,16 @@ DbCrud.prototype.get = function (id, cb) {
 				}
 			})
 		} else {
-			cb(null,null)
+			cb(null, null)
 		}
 	});
 }
 
 
 DbCrud.prototype.synchronize = function (dbName, cb) {
+	if (this.dbs) {
+		return;
+	}
 	var adb = db(dbName);
 	adb.collectionNames(null, {namesOnly: true}, function (e, collectionNames) {
 		if (e) {
@@ -80,9 +81,7 @@ DbCrud.prototype.synchronize = function (dbName, cb) {
 			var collection = {};
 			collectionNames.forEach(function (name) {
 				var shortName = name.substring(dbName.length + 1);
-				if (!shortName.match(/^system/)) {
-					collection[shortName] = false;
-				}
+				collection[shortName] = false;
 			})
 			var existing = Object.keys(collection);
 			metaCollection.find({db: dbName}, function (e, results) {
@@ -137,7 +136,7 @@ DbCrud.prototype.synchronize = function (dbName, cb) {
 };
 
 DbCrud.prototype.synchronizeAll = function (cb) {
-	var me =this;
+	var me = this;
 	this.find(function (e, dbs) {
 		if (e) {
 			cb(e);

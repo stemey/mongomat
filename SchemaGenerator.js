@@ -23,8 +23,8 @@ SchemaGenerator.prototype.generateSingle = function (parentProp, sample, ctx) {
 		Object.keys(sample).forEach(function (prop) {
 			this.generateProp(this.createPath(parentProp, prop), sample[prop], ctx);
 		}, this);
-	}else{
-		console.log("no object "+sample);
+	} else {
+		console.log("no object " + sample);
 	}
 }
 SchemaGenerator.prototype.getTypeDiscriminator = function (sample) {
@@ -54,9 +54,9 @@ SchemaGenerator.prototype.mergeSchemaSamples = function (schemaSamples) {
 				types[schemaSample.type]++;
 			}
 		})
-		var required=true;
-		if ("any" in types)  {
-			required=false;
+		var required = true;
+		if ("any" in types) {
+			required = false;
 			delete types.any;
 		}
 		if (Object.keys(types).length == 1) {
@@ -67,8 +67,8 @@ SchemaGenerator.prototype.mergeSchemaSamples = function (schemaSamples) {
 				schema[prop] = propSamples[0];
 				schema[prop].required = required;
 			}
-		}else{
-			schema[prop]={type:"any"}
+		} else {
+			schema[prop] = {type: "any"}
 		}
 
 	}, this)
@@ -149,9 +149,13 @@ SchemaGenerator.prototype.generate_array = function (prop, sample, ctx) {
 	schema.value = sample;
 	//schema.itemsType=this.getType();
 	ctx.add(prop, schema);
+	if (sample.length == 0) {
+		sample = [""]
+	}
 	sample.forEach(function (element) {
 		this.generateProp(this.createPath(prop, "items"), element, ctx);
 	}, this);
+
 }
 SchemaGenerator.prototype.getType = function (propSample) {
 	var type;

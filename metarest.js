@@ -1,13 +1,14 @@
 var express = require('express'),
 	mongoskin = require('mongoskin'),
 	dbHelper = require('mongoskin/lib/helper'),
-	QueryParser = require('./QueryParser')
+	DbQueryParser = require('./DbQueryParser')
 	MetaCrud = require('./MetaCrud'),
 	ejsonHelper = require('./ejsonHelper'),
 	SchemaSampler = require('./SchemaSampler'),
 	// TODO use the special meta db
 	db = require('./app').db,
-	// TODO name collision app
+	config = require('./app').config,
+		// TODO name collision app
 	app = require('./app').app,
 	metaCollection = require('./app').metaCollection
 schemaCollection = require('./app').schemaCollection
@@ -15,9 +16,9 @@ schemaCollection = require('./app').schemaCollection
 
 var meta = require('./app').metaCollection;
 
-var queryParser = new QueryParser();
+var queryParser = new DbQueryParser(config);
 
-var metaCrud = new MetaCrud({queryParser: queryParser, db: db});
+var metaCrud = new MetaCrud({queryParser: queryParser, db: db, dbNames:config.dbNames});
 
 var schemaSampler = new SchemaSampler({
 	db: db,

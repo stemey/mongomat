@@ -1,12 +1,12 @@
 var GenericCrud = require('./GenericCrud');
-var dbHelper = require('mongoskin/lib/helper');
 var ejsonHelper = require('./ejsonHelper');
+var DbQueryParser = require('./DbQueryParser');
 var util = require('util');
-var ObjectID = require('bson').ObjectID
 
 
 var MetaCrud = function (config) {
 	GenericCrud.call(this, config);
+	this.queryParser = new DbQueryParser(config);
 	this.db = config.db;
 }
 
@@ -48,7 +48,11 @@ MetaCrud.prototype.delete = function (collection, id, res, next) {
 
 MetaCrud.prototype.update = function (collection, doc, id, res, next) {
 	var me = this;
-	collection.count({collection: doc.collection, db:doc.db,_id: {$ne: ejsonHelper.deflateId(id)}}, function (e, result) {
+	collection.count({
+		collection: doc.collection,
+		db: doc.db,
+		_id: {$ne: ejsonHelper.deflateId(id)}
+	}, function (e, result) {
 		if (result > 0) {
 			res.status(512).send({status: 512, message: "the collection already exists"})
 		} else {

@@ -5,6 +5,7 @@ var DbCrud = require('./DbCrud'),
 
 var dbCrud = new DbCrud();
 
+
 if (config.synchronize) {
 	dbCrud.synchronizeAll();
 }
@@ -18,7 +19,6 @@ app.get('/db', function (req, res, next) {
 
 app.get('/db/:id', function (req, res, next) {
 	dbCrud.get(req.params.id, function (err, db) {
-
 		if (err != null) {
 			return next(err);
 		} else if (db === null) {
@@ -29,7 +29,7 @@ app.get('/db/:id', function (req, res, next) {
 	});
 });
 
-app.put('/db/synchronize/:id', function (req, res, next) {
+app.put('/db-synchronize/:id', function (req, res, next) {
 	var dbName = req.param("id");
 	dbCrud.synchronize(dbName, function (e, result) {
 		if (e) {

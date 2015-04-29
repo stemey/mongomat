@@ -1,9 +1,9 @@
 var EJSON = require('mongodb-extended-json');
+var util = require('util');
 
-var QueryParser = function () {
+var QueryParser = function (config) {
 
 }
-
 
 QueryParser.prototype.readJsonParam = function (req, key, defaultValue) {
 	var value;

@@ -1,4 +1,6 @@
-var app = require('./app').app;
+var app = require('./app').app,
+	config = require('./app').config,
+	open = require('open');
 
 
 // add cors support
@@ -21,4 +23,9 @@ require('./dbrest');
 require('./schemarest');
 
 
-app.listen(3001);
+console.info("starting server on port " + config.port);
+app.listen(config.port);
+if (config.openBrowser) {
+	console.info("opening browser")
+	open("http://localhost:" + config.port + "/client/mongodb.html");
+}

@@ -27,13 +27,18 @@ SchemaSampler.prototype.sample = function (metaId, params, callback, errCallback
 					errCallback(e);
 				} else {
 					cursor.toArray(function (e, results) {
-						var schema = this.generate(params, results);
-						var discriminators = Object.keys(schema);
-						if (discriminators.length == 1 && discriminators[0] == "default") {
-							var name = discriminators[0];
-							this.sampleSingleSchema(meta, meta.collection, schema[name], params, callback, errCallback);
-						} else {
-							this.sampleMultiSchema(meta, discriminators, schema, params, callback, errCallback);
+						try {
+							var schema = this.generate(params, results);
+							var discriminators = Object.keys(schema);
+							if (discriminators.length == 1 && discriminators[0] == "default") {
+								var name = discriminators[0];
+								this.sampleSingleSchema(meta, meta.collection, schema[name], params, callback, errCallback);
+							} else {
+								this.sampleMultiSchema(meta, discriminators, schema, params, callback, errCallback);
+							}
+						} catch (e) {
+							console.error("cannot generate schema");
+							errCallback(e);
 						}
 					}.bind(this));
 				}
