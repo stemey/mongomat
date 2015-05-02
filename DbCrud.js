@@ -18,7 +18,7 @@ var DbCrud = function () {
 
 DbCrud.prototype._getDatabases = function (cb) {
 	if (this.dbs) {
-		cb(null,this.dbs);
+		cb(null, this.dbs);
 	} else {
 		adminDb.listDatabases(function (err, dbs) {
 			if (err) {
@@ -70,9 +70,6 @@ DbCrud.prototype.get = function (id, cb) {
 
 
 DbCrud.prototype.synchronize = function (dbName, cb) {
-	if (this.dbs) {
-		return;
-	}
 	var adb = db(dbName);
 	adb.collectionNames(null, {namesOnly: true}, function (e, collectionNames) {
 		if (e) {
@@ -122,11 +119,11 @@ DbCrud.prototype.synchronize = function (dbName, cb) {
 									results.forEach(function (collection) {
 										newCollections.push(ejsonHelper.inflate(collection));
 									})
-									cb({msg: "success", collections: newCollections});
+									cb(null, {msg: "success", collections: newCollections});
 								}
 							});
 						} else {
-							cb({msg: "success", collections: []});
+							cb(null, {msg: "success", collections: []});
 						}
 					}
 				});
