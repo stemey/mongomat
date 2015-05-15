@@ -1,57 +1,51 @@
-> Node.js REST API Example with MongoDB, Mongoskin, Express 3 and 4
+# mongomat
 
-# Express.js 4.x
+the best place to manage your mongodb data.
 
-`master` branch
+features:
 
-Full tutorial: <http://webapplog.com/express-js-4-node-js-and-mongodb-rest-api-tutorial/>
+- Completely customizable ui. Customization is done in the app not in a configuration file.
+- Querybuilder ui that makes it easy to create simple to medium queries.
+- Supports sophisticated validation features.
 
-Brief instructions:
+VIDEO
 
-```
-$ git clone https://github.com/azat-co/rest-api-express.git
-$ cd rest-api-express
-$ npm install
-$ node express.js
-```
+#Installation
 
-In a new terminal window:
-
-```
-$ mocha express.test.js
-```
-
-Or, if you don't have mocha installed globally:
-
-```
-$ ./node_modules/mocha/bin/mocha express.test.js
-```
+- npm install mongomat
+- node app.js <parameter>
 
 
-# Express.js 3.x
+##Parameters
 
-`express3` branch
+Usage: app [options]
 
-Full tutorial: <http://webapplog.com/tutorial-node-js-and-mongodb-json-rest-api-server-with-mongoskin-and-express-js/>
+  Options:
 
-Brief instructions:
+    -h, --help                output usage information
+    -V, --version             output the version number
+    -P, --port <n>            Port to run node server on. Defaults to 3001
+    -M, --metadataDb <value>  Name of meta data db. Default is metadata.
+    -B, --openBrowser <bool>  true - open app in browser. Default is true.
+    -U, --mongoUrl <value>    url of mongo server. Default is localhost:27107
+    -S, --synchronize <bool>  synchronze on start up. Default is true
+    -A, --authDb <value>      db which holds user data
+    -u, --user <value>        user
+    -p, --pwd <value>         password
+    -d, --dbs <db1,db2,>      the database visible in the tool. Necessary if you are not running ith localhost privileges.
 
-```
-$ git clone https://github.com/azat-co/rest-api-express.git
-$ cd rest-api-express
-$ git checkout express3
-$ npm install
-$ node express.js
-```
+## Authentication
 
-in a new window
+if you are running your mongodb with no authentication then you don't need to specify user and pwd or any other 
+parameters and get access to all collections. Otherwise you need to specify user/pwd and the dbs you want to access.
 
-```
-$ mocha express.test.js
-```
+## Metadata
 
-or (if you don't have mocha installed globally):
+mongomat stores metadata about collections and schemas in two extra collections. These are called `mdbCollection` and `mdbSchema`respectively
+ and will be created in the database specified by the parameter `metadataDb` - default is `metadata`.
+ 
+## Frontend
 
-```
-$ ./node_modules/mocha/bin/mocha express.test.js
-```
+The frontend is a single-page app running in the browser. It can be customized and run separately from the server by 
+setting `-B false`. The app is available [here](github.com/stemey/gform-app).
+

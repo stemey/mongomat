@@ -20,7 +20,7 @@ program
 	.option('-S, --synchronize <bool>', 'synchronze on start up', boolParser, true)
 	.option('-A, --authDb <value>', 'db which holds user data')
 	.option('-u, --user <value>', 'user')
-	.option('-d, --dbs <db1,db2,>')
+	.option('-d, --dbs <db1,db2,>', 'the database visible in the tool. Necessary if you are not running ith localhost privileges.')
 	.option('-p, --pwd <value>', 'password')
 
 
@@ -32,9 +32,8 @@ program.parse(process.argv);
 if (program.dbs) {
 	var dbNames = program.dbs.split(",");
 	//dbNames.push(program.metadataDb);
-	program.dbNames=dbNames;
+	program.dbNames = dbNames;
 }
-
 
 
 var app = express()
