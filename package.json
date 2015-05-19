@@ -1,20 +1,19 @@
 {
-  "name": "rest-api-express",
-  "version": "0.0.4",
+  "name": "mongomat",
+  "version": "0.1.0",
   "description": "",
-  "main": "express.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node express.js",
-    "test": "mocha express.test.js"
+    "start": "node main.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/azat-co/rest-api-express.git"
+    "url": "https://github.com/stemey/mongomat.git"
   },
-  "author": "Azat Mardan",
+  "author": "Stefan Meyer",
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/azat-co/rest-api-express/issues"
+    "url": "https://github.com/stemey/mongomat/issues"
   },
   "dependencies": {
 	"gform-app": "0.1.0",
