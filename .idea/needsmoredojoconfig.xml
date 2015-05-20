@@ -12,6 +12,7 @@
         <option value="doh/main(doh" />
       </list>
     </option>
+    <option name="needsMoreDojoEnabled" value="false" />
     <option name="version" value="0.7" />
   </component>
 </project>
