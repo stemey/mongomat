@@ -14,8 +14,8 @@ describe('generic crud ', function() {
 	it('finds object by id', function (done) {
 		var entity=999;
 		var collection ={
-			findById: function(id,cb) {
-				cb(null,id==1?entity:null);
+			findOne: function(query,cb) {
+				cb(null,query._id==1?entity:null);
 			}
 		};
 		var send = sinon.mock().withExactArgs(entity);
@@ -28,7 +28,7 @@ describe('generic crud ', function() {
 		var updatedEntity=999;
 		var collection ={
 			updateById: function(id,value, options,cb) {
-				expect(value.$set).to.equal(updatedEntity);
+				expect(value).to.equal(updatedEntity);
 				cb(null,id==1?1:null);
 			}
 		};
@@ -43,7 +43,7 @@ describe('generic crud ', function() {
 		var createdEntity={_id:1,value:999};
 		var collection ={
 			insert: function(value, options,cb) {
-				cb(null,createdEntity);
+				cb(null,[createdEntity]);
 			}
 		};
 		var send = sinon.mock().withExactArgs(createdEntity);

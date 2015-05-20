@@ -18,21 +18,17 @@ VIDEO
 
 ##Parameters
 
-Usage: app [options]
-
-  Options:
-
     -h, --help                output usage information
     -V, --version             output the version number
-    -P, --port <n>            Port to run node server on. Defaults to 3001
+    -P, --port <n>            Port to run node server on. Default is 3001
     -M, --metadataDb <value>  Name of meta data db. Default is metadata.
     -B, --openBrowser <bool>  true - open app in browser. Default is true.
     -U, --mongoUrl <value>    url of mongo server. Default is localhost:27107
     -S, --synchronize <bool>  synchronze on start up. Default is true
-    -A, --authDb <value>      db which holds user data
+    -A, --authDb <value>      db which holds user data.
     -u, --user <value>        user
     -p, --pwd <value>         password
-    -d, --dbs <db1,db2,>      the database visible in the tool. Necessary if you are not running ith localhost privileges.
+    -d, --dbs <db1,db2,>      the database visible in the tool. Necessary for all privileges.
 
 ## Authentication
 
