@@ -39,15 +39,22 @@ if (program.dbs) {
 var app = express()
 app.use(bodyParser())
 
+var dbPool ={};
+
 var getDb = function (name) {
-	var credentials = program.user ? program.user + ':' + program.pwd : '';
-	var url = 'mongodb://' + credentials + '@' + program.mongoUrl + '/' + name;
-	return mongoskin.db(url, {
-		db: {
-			authSource: "admin"
-		},
-		safe: true
-	});
+	var db = dbPool[name];
+	if (!db) {
+		var credentials = program.user ? program.user + ':' + program.pwd : '';
+		var url = 'mongodb://' + credentials + '@' + program.mongoUrl + '/' + name;
+		db= mongoskin.db(url, {
+			db: {
+				authSource: "admin"
+			},
+			safe: true
+		});
+		dbPool[name]=db;
+	}
+	return db;
 }
 
 console.info("connecting to mongodb ", program.mongoUrl);
@@ -65,4 +72,3 @@ module.exports.app = app;
 module.exports.metaCollection = metaCollection;
 module.exports.schemaCollection = schemaCollection;
 
-app.use("/client", express.static("./node_modules/gform-app/dist"));

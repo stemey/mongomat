@@ -1,5 +1,6 @@
 var app = require('./app').app,
 	config = require('./app').config,
+	express = require('express'),
 	open = require('open');
 
 
@@ -24,6 +25,7 @@ require('./schemarest');
 
 
 console.info("starting server on port " + config.port);
+app.use("/client", express.static("./node_modules/gform-app/dist"));
 app.listen(config.port);
 if (config.openBrowser) {
 	console.info("opening browser")

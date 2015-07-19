@@ -13,7 +13,7 @@ VIDEO
 #Installation
 
 - npm install mongomat
-- node app.js <parameter>
+- node main.js <parameter>
 
 
 ##Parameters

@@ -29,6 +29,7 @@ app.get('/db/:id', function (req, res, next) {
 	});
 });
 
+
 app.put('/db-synchronize/:id', function (req, res, next) {
 	var dbName = req.param("id");
 	dbCrud.synchronize(dbName, function (e, result) {

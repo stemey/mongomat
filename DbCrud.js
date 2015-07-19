@@ -38,6 +38,10 @@ DbCrud.prototype.find = function (cb) {
 	this._getDatabases(cb);
 };
 
+DbCrud.prototype.create = function (id, cb) {
+	this.synchronize(id,cb);
+};
+
 DbCrud.prototype.get = function (id, cb) {
 	this.find(function (err, dbs) {
 		if (err) return cb(err)
@@ -132,24 +136,11 @@ DbCrud.prototype.synchronize = function (dbName, cb) {
 	});
 };
 
-DbCrud.prototype.synchronizeAll = function (cb) {
+DbCrud.prototype.synchronizeAll = function (dbName, cb) {
 	var me = this;
-	this.find(function (e, dbs) {
-		if (e) {
-			cb(e);
-		} else {
-			var dbCount = dbs.length;
-			dbs.forEach(function (db) {
-				me.synchronize(db.name, function (e, result) {
-					dbCount--;
-					if (dbCount == 0) {
-						if (cb) cb();
-					}
-				});
-			});
-		}
-	})
+
 }
+
 
 
 module.exports = DbCrud;
