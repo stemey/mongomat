@@ -10,10 +10,15 @@ features:
 
 VIDEO
 
+#Global Installation (not for windows)
+
+- npm install mongomat -g
+- mongomat <parameters>
+
 #Installation
 
 - npm install mongomat
-- node main.js <parameter>
+- node node_modules/mongomat <parameters>
 
 
 ##Parameters

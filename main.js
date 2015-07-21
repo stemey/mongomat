@@ -25,7 +25,7 @@ require('./schemarest');
 
 
 console.info("starting server on port " + config.port);
-app.use("/client", express.static("./node_modules/gform-app/dist"));
+app.use("/client", express.static(__dirname+"/node_modules/gform-app/dist"));
 app.listen(config.port);
 if (config.openBrowser) {
 	console.info("opening browser")
