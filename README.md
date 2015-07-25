@@ -48,5 +48,5 @@ mongomat stores metadata about collections and schemas in two extra collections.
 ## Frontend
 
 The frontend is a single-page app running in the browser. It can be customized and run separately from the server by 
-setting `-B false`. The app is available [here](github.com/stemey/gform-app).
+setting `-B false`. The app is available [here](https://github.com/stemey/gform-app).
 
